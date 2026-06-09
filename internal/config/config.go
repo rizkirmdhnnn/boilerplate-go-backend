@@ -41,6 +41,12 @@ type Config struct {
 	RateLimitRequestsPerMin int `env:"RATE_LIMIT_REQUESTS_PER_MIN" default:"100"`
 	RateLimitBurst         int `env:"RATE_LIMIT_BURST" default:"20"`
 
+	RedisEnabled bool
+	RedisHost    string
+	RedisPort    int
+	RedisPassword string
+	RedisDB      int
+
 	JWTSecret     string
 	JWTExpiration time.Duration
 
@@ -86,6 +92,12 @@ func Load(envPath ...string) (*Config, error) {
 		RateLimitEnabled:       getEnvBool("RATE_LIMIT_ENABLED", true),
 		RateLimitRequestsPerMin: getEnvInt("RATE_LIMIT_REQUESTS_PER_MIN", 100),
 		RateLimitBurst:         getEnvInt("RATE_LIMIT_BURST", 20),
+
+		RedisEnabled:  getEnvBool("REDIS_ENABLED", false),
+		RedisHost:     getEnv("REDIS_HOST", "localhost"),
+		RedisPort:     getEnvInt("REDIS_PORT", 6379),
+		RedisPassword: getEnv("REDIS_PASSWORD", ""),
+		RedisDB:       getEnvInt("REDIS_DB", 0),
 
 		LogLevel: getEnv("LOG_LEVEL", "info"),
 		LogJSON:  getEnvBool("LOG_JSON", false),
