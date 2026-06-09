@@ -2,11 +2,18 @@
 
 Modern Go backend with **Clean Architecture** using the **Gin** framework.
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Go Report Card](https://goreportcard.com/badge/github.com/rizkirmdhnnn/boilerplate-go-backend)](https://goreportcard.com/report/github.com/rizkirmdhnnn/boilerplate-go-backend)
+[![Go Version](https://img.shields.io/badge/Go-1.25-blue)](https://go.dev/)
+
 ## Quick Start
 
 ```bash
 cp .env.example .env
 # Edit .env with your DB config
+
+# Install module locally
+go get github.com/rizkirmdhnnn/boilerplate-go-backend
 
 make run        # Local
 make docker-up  # Docker
