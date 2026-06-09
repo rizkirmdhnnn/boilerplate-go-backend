@@ -35,6 +35,10 @@ type Config struct {
 
 	CORSAllowedOrigins []string
 
+	RateLimitEnabled       bool `env:"RATE_LIMIT_ENABLED" default:"true"`
+	RateLimitRequestsPerMin int `env:"RATE_LIMIT_REQUESTS_PER_MIN" default:"100"`
+	RateLimitBurst         int `env:"RATE_LIMIT_BURST" default:"20"`
+
 	JWTSecret     string
 	JWTExpiration time.Duration
 
@@ -76,6 +80,10 @@ func Load(envPath ...string) (*Config, error) {
 
 		JWTSecret:     getEnv("JWT_SECRET", "change-me-in-production"),
 		JWTExpiration: getEnvDuration("JWT_EXPIRATION", 24*time.Hour),
+
+		RateLimitEnabled:       getEnvBool("RATE_LIMIT_ENABLED", true),
+		RateLimitRequestsPerMin: getEnvInt("RATE_LIMIT_REQUESTS_PER_MIN", 100),
+		RateLimitBurst:         getEnvInt("RATE_LIMIT_BURST", 20),
 
 		LogLevel: getEnv("LOG_LEVEL", "info"),
 		LogJSON:  getEnvBool("LOG_JSON", false),
