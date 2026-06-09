@@ -37,6 +37,7 @@ func (s *userService) Register(ctx context.Context, req *RegisterRequest) (*User
 		Email:    req.Email,
 		Name:     req.Name,
 		Password: string(hash),
+		IsActive: true,
 	}
 
 	if err := s.repo.Create(ctx, user); err != nil {
