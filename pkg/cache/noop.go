@@ -43,7 +43,7 @@ func (m *InMemoryCache) Get(_ context.Context, key string) (string, error) {
 	m.mu.RUnlock()
 	if !ok || (!item.expires.IsZero() && time.Now().After(item.expires)) {
 		if ok {
-			m.Del(context.Background(), key)
+			_ = m.Del(context.Background(), key) // best-effort cleanup
 		}
 		return "", ErrMiss
 	}
