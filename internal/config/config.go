@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"net/url"
 	"os"
 	"strconv"
 	"time"
@@ -32,6 +33,7 @@ type Config struct {
 	DBMaxOpenConns    int
 	DBMaxIdleConns    int
 	DBConnMaxLifetime time.Duration
+	DBMigrateDSN      string // computed: full DSN for migrations
 
 	CORSAllowedOrigins []string
 
@@ -82,6 +84,17 @@ func Load(envPath ...string) (*Config, error) {
 	}
 
 	cfg.ServerURL = fmt.Sprintf("%s:%d", cfg.ServerHost, cfg.ServerPort)
+
+	// Build full DSN for migrations
+	pw := cfg.DBPassword
+	migDSN := url.URL{
+		Scheme: "postgres",
+		Host:   fmt.Sprintf("%s:%d", cfg.DBHost, cfg.DBPort),
+		User:   url.UserPassword(cfg.DBUser, pw),
+		Path:   cfg.DBName,
+	}
+	migDSN.RawQuery = "sslmode=disable"
+	cfg.DBMigrateDSN = migDSN.String()
 
 	origins := getEnv("CORS_ALLOWED_ORIGINS", "*")
 	if origins == "*" {

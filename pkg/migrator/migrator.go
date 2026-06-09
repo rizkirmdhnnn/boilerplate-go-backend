@@ -1,54 +1,38 @@
 package migrator
 
 import (
-	"context"
+	"errors"
 	"fmt"
 	"os"
-	"path/filepath"
-	"sort"
-	"strings"
 
-	"boilerplate/pkg/database"
-
+	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/rs/zerolog/log"
 )
 
-// Run reads all .sql files from the given directory sorted by name
-// and executes them against the database pool.
-func Run(ctx context.Context, db *database.Pool, dir string) error {
-	entries, err := os.ReadDir(dir)
+// Run executes all pending migrations using golang-migrate.
+// dsn must be a full postgres:// connection string.
+func Run(dsn, dir string) error {
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		return fmt.Errorf("migrations directory %q not found", dir)
+	}
+
+	sourceURL := fmt.Sprintf("file://%s", dir)
+	m, err := migrate.New(sourceURL, dsn)
 	if err != nil {
-		return fmt.Errorf("read migrations directory %q: %w", dir, err)
+		return fmt.Errorf("create migrator: %w", err)
+	}
+	defer m.Close()
+
+	if err := m.Up(); err != nil {
+		if errors.Is(err, migrate.ErrNoChange) {
+			log.Info().Msg("no new migrations to apply")
+			return nil
+		}
+		return fmt.Errorf("run migrations: %w", err)
 	}
 
-	// Filter and sort .sql files
-	var files []string
-	for _, e := range entries {
-		if e.IsDir() || !strings.HasSuffix(e.Name(), ".sql") {
-			continue
-		}
-		files = append(files, e.Name())
-	}
-	sort.Strings(files)
-
-	for _, fname := range files {
-		path := filepath.Join(dir, fname)
-		content, err := os.ReadFile(path)
-		if err != nil {
-			return fmt.Errorf("read migration %q: %w", fname, err)
-		}
-
-		sql := strings.TrimSpace(string(content))
-		if sql == "" {
-			continue
-		}
-
-		if _, err := db.Exec(ctx, sql); err != nil {
-			return fmt.Errorf("execute migration %q: %w", fname, err)
-		}
-
-		log.Info().Str("migration", fname).Msg("applied")
-	}
-
+	log.Info().Msg("all migrations applied successfully")
 	return nil
 }

@@ -64,7 +64,7 @@ func main() {
 
 	// Auto-run database migrations
 	if db != nil {
-		if err := migrator.Run(context.Background(), db, "migrations"); err != nil {
+		if err := migrator.Run(cfg.DBMigrateDSN, "migrations"); err != nil {
 			log.Fatal().Err(err).Msg("failed to run database migrations")
 		}
 	}

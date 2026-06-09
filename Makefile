@@ -1,4 +1,4 @@
-.PHONY: help run build test lint clean swag docker-up docker-down migrate generate
+.PHONY: help run build test lint clean swag docker-up docker-down migrate generate watch
 
 APP_NAME := boilerplate
 BINARY := api
@@ -40,10 +40,13 @@ docker-down: ## Stop services
 docker-logs: ## Follow logs
 	docker compose logs -f
 
-migrate-up: ## Run migrations (requires migrate CLI)
+migrate-create: ## Create a new migration (usage: make migrate-create NAME=create_todos)
+	migrate create -ext sql -dir migrations -seq $(NAME)
+
+migrate-up: ## Run all pending migrations
 	migrate -path migrations -database "postgres://$(DB_USER):$(DB_PASSWORD)@$(DB_HOST):$(DB_PORT)/$(DB_NAME)?sslmode=disable" up
 
-migrate-down: ## Rollback migrations
+migrate-down: ## Rollback last migration
 	migrate -path migrations -database "postgres://$(DB_USER):$(DB_PASSWORD)@$(DB_HOST):$(DB_PORT)/$(DB_NAME)?sslmode=disable" down 1
 
 coverage: ## Show test coverage
