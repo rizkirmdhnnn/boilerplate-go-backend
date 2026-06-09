@@ -28,5 +28,8 @@ vendor/
 coverage.out
 *.cov
 
+# Generated docs (swagger, etc.)
+docs/
+
 # Testing
 testdata/
