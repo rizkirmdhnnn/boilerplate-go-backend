@@ -27,6 +27,7 @@ import (
 	"boilerplate/internal/middleware"
 	"boilerplate/internal/repository"
 	"boilerplate/internal/router"
+	"boilerplate/pkg/cache"
 	"boilerplate/pkg/database"
 	"boilerplate/pkg/migrator"
 
@@ -73,12 +74,33 @@ func main() {
 	userRepo := repository.NewUserRepository(db)                    // port → postgres adapter
 	userSvc := application.NewUserService(userRepo, cfg.JWTSecret, cfg.JWTExpiration) // use-case
 
+	// Cache — Redis or noop fallback
+	var cacheClient cache.Cache
+	if cfg.RedisEnabled {
+		rc, err := cache.NewRedis(cache.Config{
+			Host:     cfg.RedisHost,
+			Port:     cfg.RedisPort,
+			Password: cfg.RedisPassword,
+			DB:       cfg.RedisDB,
+		})
+		if err != nil {
+			log.Fatal().Err(err).Msg("failed to connect to Redis")
+		}
+		cacheClient = rc
+		log.Info().Msg("cache: using Redis")
+	} else {
+		cacheClient = cache.NewNoop()
+		log.Info().Msg("cache: disabled (noop)")
+	}
+	defer cacheClient.Close()
+
 	// Router
 	r := router.Setup(&router.Config{
 		JWTSecret:   cfg.JWTSecret,
 		CORSOrigins: cfg.CORSAllowedOrigins,
 		AppVersion:  cfg.AppVersion,
 		Debug:       cfg.Debug,
+		Cache:       cacheClient,
 		UserSvc:     userSvc,
 		DBPool:      db,
 
