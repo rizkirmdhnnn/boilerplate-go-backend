@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"net/http"
+	"strconv"
 	"sync"
 	"time"
 
@@ -152,9 +153,9 @@ func (rl *RateLimiter) RateLimit() gin.HandlerFunc {
 		ok, remaining, limit, resetTime := rl.allow(ip)
 
 		// Always set headers
-		c.Header("X-RateLimit-Limit", intToStr(limit))
-		c.Header("X-RateLimit-Remaining", intToStr(remaining))
-		c.Header("X-RateLimit-Reset", intToStr(int(resetTime.Unix())))
+		c.Header("X-RateLimit-Limit", strconv.Itoa(limit))
+		c.Header("X-RateLimit-Remaining", strconv.Itoa(remaining))
+		c.Header("X-RateLimit-Reset", strconv.Itoa(int(resetTime.Unix())))
 
 		if !ok {
 			response.Error(c, http.StatusTooManyRequests, "too many requests, please try again later")
@@ -164,28 +165,4 @@ func (rl *RateLimiter) RateLimit() gin.HandlerFunc {
 
 		c.Next()
 	}
-}
-
-// intToStr converts an int to a string without importing strconv.
-func intToStr(n int) string {
-	if n == 0 {
-		return "0"
-	}
-	neg := false
-	if n < 0 {
-		neg = true
-		n = -n
-	}
-	var buf [20]byte
-	i := len(buf)
-	for n > 0 {
-		i--
-		buf[i] = byte('0' + n%10)
-		n /= 10
-	}
-	if neg {
-		i--
-		buf[i] = '-'
-	}
-	return string(buf[i:])
 }
