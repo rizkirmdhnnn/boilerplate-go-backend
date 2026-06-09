@@ -12,6 +12,7 @@ run: ## Run the API server locally
 	go run ./cmd/api
 
 watch: ## Run with hot reload (air)
+	@command -v air >/dev/null 2>&1 || { echo "air not installed. Run: go install github.com/air-verse/air@latest"; exit 1; }
 	air
 
 build: ## Build the binary
