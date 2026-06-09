@@ -26,7 +26,13 @@ type HealthResponse struct {
 	Database  string `json:"database"`
 }
 
-// Check responds with service health status.
+// Check godoc
+// @Summary      Health check
+// @Description  Returns service health status including database connectivity
+// @Tags         system
+// @Produce      json
+// @Success      200  {object}  HealthResponse
+// @Router       /health [get]
 func (h *HealthHandler) Check(c *gin.Context) {
 	version := c.GetString("app_version")
 	if version == "" {

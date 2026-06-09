@@ -1,6 +1,11 @@
 package router
 
 import (
+	_ "boilerplate/docs"
+
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+
 	"boilerplate/internal/application"
 	"boilerplate/internal/handler"
 	"boilerplate/internal/middleware"
@@ -48,6 +53,9 @@ func Setup(cfg *Config) *gin.Engine {
 
 	// Health — no auth
 	r.GET("/health", healthHdr.Check)
+
+	// Swagger UI
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// API v1
 	v1 := r.Group("/api/v1")
