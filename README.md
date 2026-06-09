@@ -1,6 +1,38 @@
 # Boilerplate Go Backend
 
-Modern Go backend template using **Gin** framework with clean architecture pattern.
+Modern Go backend with **Clean Architecture** using the **Gin** framework.
+
+## Architecture
+
+```
+┌──────────────────────────────────────────────┐
+│           cmd/api/main.go                    │
+│         (composition root / DI)              │
+├──────────────────────────────────────────────┤
+│               router/                        │
+│            (routes + wiring)                 │
+├───────────────┬──────────────────┬───────────┤
+│   handler/    │   middleware/    │ repository│
+│ (HTTP adapter)│  (HTTP concern)  │ (DB impl) │
+├───────────────┴──────────────────┴───────────┤
+│              application/                    │
+│           (use cases / service)              │
+├──────────────────────────────────────────────┤
+│                domain/                       │
+│    (entities + port interfaces)  ← 0 deps   │
+└──────────────────────────────────────────────┘
+```
+
+**Dependency rule:** Dependencies flow **inward**. Nothing in an inner circle imports from an outer circle.
+
+| Layer | Depends On | Purpose |
+|-------|-----------|---------|
+| `domain/` | nothing | Entities + repository interfaces (ports) |
+| `application/` | `domain/` only | Use cases, business logic, DTOs |
+| `handler/` | `application/` | HTTP adapter — converts requests/responses |
+| `repository/` | `domain/` | Implements repository ports (PostgreSQL) |
+| `middleware/` | `application/` | HTTP concerns (auth, CORS, logging) |
+| `cmd/api/` | everything | Composition root, DI wiring |
 
 ## Tech Stack
 
@@ -9,81 +41,65 @@ Modern Go backend template using **Gin** framework with clean architecture patte
 - **Auth:** JWT (HS256) via [golang-jwt](https://github.com/golang-jwt/jwt)
 - **Logging:** [zerolog](https://github.com/rs/zerolog)
 - **Config:** Environment-based via [godotenv](https://github.com/joho/godotenv)
-- **Migrations:** Raw SQL files
 
 ## Project Structure
 
 ```
-├── cmd/api/           # Entry point
+├── cmd/api/              # Entry point — dependency injection
 ├── internal/
-│   ├── config/        # Environment config
-│   ├── handler/       # HTTP handlers
-│   ├── middleware/     # Gin middleware
-│   ├── model/         # Domain models
-│   ├── repository/    # Data access layer
-│   ├── service/       # Business logic
-│   └── router/        # Route setup
-├── migrations/        # SQL migrations
-└── pkg/
-    ├── database/      # DB connection pool
-    └── response/      # Standard API response
+│   ├── domain/           # Entities + port interfaces (pure Go)
+│   ├── application/      # Use cases, DTOs, JWT helpers
+│   ├── handler/          # HTTP handlers (adapters)
+│   ├── middleware/        # Gin middleware (auth, CORS, logging)
+│   ├── repository/       # PostgreSQL adapter (implements domain ports)
+│   └── router/           # Route definitions
+├── migrations/           # SQL migrations
+├── pkg/
+│   ├── database/         # Database connection pool
+│   └── response/         # Standard API response helpers
+├── Dockerfile
+├── docker-compose.yml
+└── Makefile
 ```
 
 ## Quick Start
 
-### Prerequisites
-
-- Go 1.23+
-- Docker & Docker Compose (optional)
-- PostgreSQL 16 (if running locally)
-
-### Local Development
-
 ```bash
 # Copy env
 cp .env.example .env
-# Edit .env with your config
+# Edit .env with your DB config
 
-# Run
+# Local
 make run
-```
 
-### With Docker
-
-```bash
+# Docker
 make docker-up
 ```
 
-API is available at `http://localhost:8080`.
-
 ## API Endpoints
 
-### Public
-
+**Public:**
 | Method | Path | Description |
 |--------|------|-------------|
 | GET | /health | Health check |
 | POST | /api/v1/auth/register | Register |
 | POST | /api/v1/auth/login | Login |
 
-### Protected (Bearer Token)
-
+**Protected (Bearer token):**
 | Method | Path | Description |
 |--------|------|-------------|
 | GET | /api/v1/users/me | Current profile |
-| GET | /api/v1/users | List users |
-| GET | /api/v1/users/:id | Get user |
-| PUT | /api/v1/users/:id | Update user |
-| DELETE | /api/v1/users/:id | Delete user |
+| GET | /api/v1/users | List (paginated) |
+| GET | /api/v1/users/:id | Get by ID |
+| PUT | /api/v1/users/:id | Update |
+| DELETE | /api/v1/users/:id | Delete |
 
-## Makefile
+## Commands
 
 ```bash
 make run          # Start server
 make build        # Build binary
 make test         # Run tests
-make lint         # Run linter
 make docker-up    # Docker Compose up
 make docker-down  # Docker Compose down
-make tidy         # Tidy modules
 ```

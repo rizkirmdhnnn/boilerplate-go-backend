@@ -8,25 +8,23 @@ import (
 	"os/signal"
 	"syscall"
 
+	"boilerplate/internal/application"
 	"boilerplate/internal/config"
-	"boilerplate/internal/handler"
 	"boilerplate/internal/middleware"
 	"boilerplate/internal/repository"
 	"boilerplate/internal/router"
-	"boilerplate/internal/service"
 	"boilerplate/pkg/database"
 
 	"github.com/rs/zerolog/log"
 )
 
 func main() {
-	// Load config
 	cfg, err := config.Load()
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to load config")
 	}
 
-	// Setup logging
+	// Logging
 	middleware.LogLevelSetter(cfg.LogLevel)
 	middleware.LogFormatSetter(cfg.LogJSON)
 
@@ -36,7 +34,7 @@ func main() {
 		Str("env", cfg.Env).
 		Msg("starting server")
 
-	// Database connection
+	// Database — infrastructure adapter
 	var db *database.Pool
 	if cfg.DBHost != "" {
 		dsn := database.DSN(cfg.DBHost, cfg.DBPort, cfg.DBUser, cfg.DBPassword, cfg.DBName)
@@ -49,21 +47,18 @@ func main() {
 		log.Warn().Msg("no database configured, running without DB")
 	}
 
-	// Initialize layers
-	userRepo := repository.NewUserRepository(db)
-	userSvc := service.NewUserService(userRepo, cfg.JWTSecret, cfg.JWTExpiration)
-	userHdr := handler.NewUserHandler(userSvc)
-	healthHdr := handler.NewHealthHandler(db)
+	// Dependency injection — wire ports to adapters
+	userRepo := repository.NewUserRepository(db)                    // port → postgres adapter
+	userSvc := application.NewUserService(userRepo, cfg.JWTSecret, cfg.JWTExpiration) // use-case
 
-	// Setup router
+	// Router
 	r := router.Setup(&router.Config{
-		JWTSecret:     cfg.JWTSecret,
-		CORSOrigins:   cfg.CORSAllowedOrigins,
-		DBPool:        db,
-		AppVersion:    cfg.AppVersion,
-		Debug:         cfg.Debug,
-		UserHandler:   userHdr,
-		HealthHandler: healthHdr,
+		JWTSecret:   cfg.JWTSecret,
+		CORSOrigins: cfg.CORSAllowedOrigins,
+		AppVersion:  cfg.AppVersion,
+		Debug:       cfg.Debug,
+		UserSvc:     userSvc,
+		DBPool:      db,
 	})
 
 	// HTTP server
@@ -85,7 +80,6 @@ func main() {
 		}
 	}()
 
-	// Wait for signal
 	sig := <-quit
 	log.Info().Str("signal", sig.String()).Msg("shutting down")
 

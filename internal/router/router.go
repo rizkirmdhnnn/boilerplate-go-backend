@@ -1,6 +1,7 @@
 package router
 
 import (
+	"boilerplate/internal/application"
 	"boilerplate/internal/handler"
 	"boilerplate/internal/middleware"
 	"boilerplate/pkg/database"
@@ -8,15 +9,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Config holds router configuration.
+// Config holds router dependencies.
+// All fields are interfaces (ports) — actual implementations are injected in main.
 type Config struct {
 	JWTSecret     string
 	CORSOrigins   []string
-	DBPool        *database.Pool
 	AppVersion    string
 	Debug         bool
-	UserHandler   *handler.UserHandler
-	HealthHandler *handler.HealthHandler
+	UserSvc       application.UserService
+	DBPool        *database.Pool
 }
 
 // Setup configures the Gin router with all routes and middleware.
@@ -36,46 +37,46 @@ func Setup(cfg *Config) *gin.Engine {
 	r.Use(middleware.CORS(cfg.CORSOrigins))
 	r.Use(middleware.SecurityHeaders())
 
-	// Set app version in context
 	r.Use(func(c *gin.Context) {
 		c.Set("app_version", cfg.AppVersion)
 		c.Next()
 	})
 
-	// Health check — no auth
-	r.GET("/health", cfg.HealthHandler.Check)
+	// Handlers
+	healthHdr := handler.NewHealthHandler(cfg.DBPool)
+	userHdr := handler.NewUserHandler(cfg.UserSvc)
+
+	// Health — no auth
+	r.GET("/health", healthHdr.Check)
 
 	// API v1
 	v1 := r.Group("/api/v1")
 
-	// Auth routes (public)
+	// Auth (public)
 	auth := v1.Group("/auth")
 	{
-		auth.POST("/register", cfg.UserHandler.Register)
-		auth.POST("/login", cfg.UserHandler.Login)
+		auth.POST("/register", userHdr.Register)
+		auth.POST("/login", userHdr.Login)
 	}
 
-	// Protected routes
+	// Protected
 	protected := v1.Group("")
 	protected.Use(middleware.AuthRequired(cfg.JWTSecret))
 	{
 		users := protected.Group("/users")
 		{
-			users.GET("/me", cfg.UserHandler.GetProfile)
-			users.GET("", cfg.UserHandler.ListUsers)
-			users.GET("/:id", cfg.UserHandler.GetUser)
-			users.PUT("/:id", cfg.UserHandler.UpdateUser)
-			users.DELETE("/:id", cfg.UserHandler.DeleteUser)
+			users.GET("/me", userHdr.GetProfile)
+			users.GET("", userHdr.ListUsers)
+			users.GET("/:id", userHdr.GetUser)
+			users.PUT("/:id", userHdr.UpdateUser)
+			users.DELETE("/:id", userHdr.DeleteUser)
 		}
 	}
 
-	// NoRoute handler
 	r.NoRoute(func(c *gin.Context) {
 		c.JSON(404, gin.H{
 			"success": false,
-			"error": gin.H{
-				"message": "route not found",
-			},
+			"error":   gin.H{"message": "route not found"},
 		})
 	})
 
