@@ -105,3 +105,60 @@ make watch        # Hot reload (auto-restart on file change)
 make docker-up    # Docker Compose up (api + postgres + redis)
 make docker-down  # Docker Compose down
 ```
+
+## Kubernetes
+
+Deploy to any K8s cluster with [Kustomize](https://kustomize.io/):
+
+```bash
+make k8s-apply       # Apply all manifests
+make k8s-status      # Pods + Services + HPA
+make k8s-logs        # Follow API logs
+make k8s-restart     # Rollout restart
+make k8s-secret      # Sync secrets from .env
+make k8s-delete      # Tear down
+```
+
+### Manifests (`k8s/`)
+
+| File | Description |
+|------|-------------|
+| `namespace.yaml` | `boilerplate` namespace |
+| `configmap.yaml` | Non-sensitive config (DB host, rate limit, log level, etc.) |
+| `secret.yaml` | Template — use `kubectl create secret` or External Secrets |
+| `deployment.yaml` | 2 replicas, rolling update, health probes, resource limits |
+| `service.yaml` | ClusterIP on port 80 |
+| `ingress.yaml` | nginx ingress with TLS — update host before using |
+| `hpa.yaml` | Autoscale 2→10 pods at 70% CPU / 80% memory |
+| `kustomization.yaml` | Kustomize root — add `overlays/` for env-specific config |
+
+### Secrets
+
+Secrets are **not committed** with real values. Use one of:
+
+```bash
+# Makefile helper (reads from .env)
+make k8s-secret
+
+# Or manually
+kubectl create secret generic boilerplate-secret -n boilerplate \
+  --from-literal=DB_PASSWORD='your-password' \
+  --from-literal=JWT_SECRET='your-secret'
+
+# Or GitOps: SealedSecrets / External Secrets
+```
+
+### Image
+
+Update the image in `k8s/deployment.yaml` to your container registry:
+
+```yaml
+image: ghcr.io/rizkirmdhnnn/boilerplate-go-backend:latest
+```
+
+Build & push:
+
+```bash
+docker build -t ghcr.io/rizkirmdhnnn/boilerplate-go-backend:latest .
+docker push ghcr.io/rizkirmdhnnn/boilerplate-go-backend:latest
+```

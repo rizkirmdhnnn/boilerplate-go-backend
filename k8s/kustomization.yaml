@@ -1,0 +1,22 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: boilerplate
+
+resources:
+  - namespace.yaml
+  - configmap.yaml
+  - secret.yaml
+  - deployment.yaml
+  - service.yaml
+  - ingress.yaml
+  - hpa.yaml
+
+commonLabels:
+  app.kubernetes.io/name: boilerplate
+  app.kubernetes.io/managed-by: kustomize
+  app.kubernetes.io/part-of: boilerplate-backend
+
+# Override per environment via overlays/ —
+# Example: kustomize build overlays/production
+# Example: kustomize build overlays/staging

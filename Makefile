@@ -56,5 +56,36 @@ migrate-down: ## Rollback last migration
 coverage: ## Show test coverage
 	go tool cover -html=coverage.out
 
+# ──────────────────────────────────────────────
+# Kubernetes
+# ──────────────────────────────────────────────
+
+K8S_NS := boilerplate
+
+k8s-apply: ## Apply all K8s manifests via Kustomize
+	kubectl apply -k k8s/
+
+k8s-delete: ## Delete all K8s manifests via Kustomize
+	kubectl delete -k k8s/
+
+k8s-status: ## Show K8s pods and services
+	@echo "=== Pods ===" && kubectl get pods -n $(K8S_NS)
+	@echo "=== Services ===" && kubectl get svc -n $(K8S_NS)
+	@echo "=== HPA ===" && kubectl get hpa -n $(K8S_NS)
+
+k8s-logs: ## Follow API logs
+	kubectl logs -n $(K8S_NS) -l app.kubernetes.io/component=api --tail=50 -f
+
+k8s-restart: ## Rollout restart API deployment
+	kubectl rollout restart deployment/boilerplate-api -n $(K8S_NS)
+
+k8s-secret: ## Create secret from .env file (usage: make k8s-secret)
+	@test -f .env || { echo ".env file not found"; exit 1; }
+	kubectl create secret generic boilerplate-secret -n $(K8S_NS) \
+		--from-literal=DB_PASSWORD="$(shell grep DB_PASSWORD .env | cut -d= -f2)" \
+		--from-literal=JWT_SECRET="$(shell grep JWT_SECRET .env | cut -d= -f2)" \
+		--from-literal=REDIS_PASSWORD="$(shell grep REDIS_PASSWORD .env | cut -d= -f2)" \
+		--dry-run=client -o yaml | kubectl apply -f -
+
 tidy: ## Tidy go modules
 	go mod tidy

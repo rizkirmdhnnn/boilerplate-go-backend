@@ -1,0 +1,29 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: boilerplate-ingress
+  namespace: boilerplate
+  labels:
+    app.kubernetes.io/name: boilerplate
+    app.kubernetes.io/part-of: boilerplate-backend
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "30"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: api.boilerplate.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: boilerplate-api
+                port:
+                  name: http
+  tls:
+    - hosts:
+        - api.boilerplate.example.com
+      secretName: boilerplate-tls
