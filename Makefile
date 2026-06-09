@@ -26,7 +26,7 @@ lint: ## Run linter
 swag: ## Regenerate Swagger docs
 	swag init -g cmd/api/main.go --output docs --quiet
 
-generate: swag ## Run go generate (regenerates swagger docs)
+generate: swag ## Run go generate (alias for make swag)
 
 clean: ## Clean build artifacts
 	rm -rf $(BUILD_DIR) coverage.out

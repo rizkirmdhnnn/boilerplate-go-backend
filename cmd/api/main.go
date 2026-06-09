@@ -12,7 +12,7 @@
 // @description                Type "Bearer {token}" in the value field
 package main
 
-//go:generate swag init -g main.go --output ../docs --quiet
+//go:generate echo "use 'make swag' or run 'swag init -g cmd/api/main.go --output docs' from project root"
 
 import (
 	"context"
