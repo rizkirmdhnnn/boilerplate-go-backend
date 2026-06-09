@@ -58,10 +58,7 @@ func (m *mockUserSvc) Delete(ctx context.Context, id int64) error {
 	return args.Error(0)
 }
 
-var (
-	errExample    = errors.New("something went wrong")
-	errBadRequest = errors.New("bad request")
-)
+var errExample = errors.New("something went wrong")
 
 func dummyUserResp() *application.UserResponse {
 	return &application.UserResponse{

@@ -130,7 +130,7 @@ func TestLogin_Success(t *testing.T) {
 	require.Equal(t, 200, w.Code)
 
 	var resp map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &resp)
+	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
 	assert.True(t, resp["success"].(bool))
 	mockSvc.AssertExpectations(t)
 }
@@ -182,7 +182,7 @@ func TestHealthCheck(t *testing.T) {
 	assert.Equal(t, 200, w.Code)
 
 	var resp map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &resp)
+	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
 	assert.Equal(t, "ok", resp["status"])
 }
 

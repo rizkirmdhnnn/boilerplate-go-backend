@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // testContext creates a Gin context with a fresh ResponseRecorder.
@@ -25,7 +26,7 @@ func TestOK(t *testing.T) {
 
 	assert.Equal(t, 200, w.Code)
 	var resp APIResponse
-	json.Unmarshal(w.Body.Bytes(), &resp)
+	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
 	assert.True(t, resp.Success)
 	assert.Equal(t, map[string]interface{}{"key": "value"}, resp.Data)
 }
@@ -36,7 +37,7 @@ func TestCreated(t *testing.T) {
 
 	assert.Equal(t, 201, w.Code)
 	var resp APIResponse
-	json.Unmarshal(w.Body.Bytes(), &resp)
+	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
 	assert.True(t, resp.Success)
 }
 
@@ -46,7 +47,7 @@ func TestMessage(t *testing.T) {
 
 	assert.Equal(t, 200, w.Code)
 	var resp APIResponse
-	json.Unmarshal(w.Body.Bytes(), &resp)
+	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
 	assert.True(t, resp.Success)
 	assert.Equal(t, "hello", resp.Message)
 }
@@ -57,7 +58,7 @@ func TestError(t *testing.T) {
 
 	assert.Equal(t, 400, w.Code)
 	var resp APIResponse
-	json.Unmarshal(w.Body.Bytes(), &resp)
+	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
 	assert.False(t, resp.Success)
 	assert.Equal(t, "bad request", resp.Error.Message)
 }
@@ -68,7 +69,7 @@ func TestValidationError(t *testing.T) {
 
 	assert.Equal(t, 422, w.Code)
 	var resp APIResponse
-	json.Unmarshal(w.Body.Bytes(), &resp)
+	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
 	assert.False(t, resp.Success)
 }
 
@@ -78,7 +79,7 @@ func TestNotFound(t *testing.T) {
 
 	assert.Equal(t, 404, w.Code)
 	var resp APIResponse
-	json.Unmarshal(w.Body.Bytes(), &resp)
+	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
 	assert.False(t, resp.Success)
 	assert.Equal(t, "resource not found", resp.Error.Message)
 }
@@ -89,7 +90,7 @@ func TestInternalError(t *testing.T) {
 
 	assert.Equal(t, 500, w.Code)
 	var resp APIResponse
-	json.Unmarshal(w.Body.Bytes(), &resp)
+	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
 	assert.False(t, resp.Success)
 }
 
@@ -99,7 +100,7 @@ func TestUnauthorized(t *testing.T) {
 
 	assert.Equal(t, 401, w.Code)
 	var resp APIResponse
-	json.Unmarshal(w.Body.Bytes(), &resp)
+	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
 	assert.False(t, resp.Success)
 }
 
@@ -109,7 +110,7 @@ func TestForbidden(t *testing.T) {
 
 	assert.Equal(t, 403, w.Code)
 	var resp APIResponse
-	json.Unmarshal(w.Body.Bytes(), &resp)
+	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
 	assert.False(t, resp.Success)
 	assert.Equal(t, "no access", resp.Error.Message)
 }
@@ -120,7 +121,7 @@ func TestPaginated(t *testing.T) {
 
 	assert.Equal(t, 200, w.Code)
 	var resp APIResponse
-	json.Unmarshal(w.Body.Bytes(), &resp)
+	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
 	assert.True(t, resp.Success)
 	assert.Equal(t, 1, resp.Meta.Page)
 	assert.Equal(t, 10, resp.Meta.PerPage)
@@ -134,7 +135,7 @@ func TestErrorDetail(t *testing.T) {
 
 	assert.Equal(t, 409, w.Code)
 	var resp APIResponse
-	json.Unmarshal(w.Body.Bytes(), &resp)
+	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
 	assert.False(t, resp.Success)
 	assert.Equal(t, "CONFLICT", resp.Error.Code)
 	assert.Equal(t, "duplicate", resp.Error.Message)
