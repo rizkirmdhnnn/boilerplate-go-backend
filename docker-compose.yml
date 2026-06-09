@@ -38,25 +38,8 @@ services:
     networks:
       - boilerplate-net
 
-  redis:
-    image: redis:7-alpine
-    container_name: boilerplate-redis
-    restart: unless-stopped
-    ports:
-      - "6379:6379"
-    volumes:
-      - redisdata:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
-      retries: 10
-    networks:
-      - boilerplate-net
-
 volumes:
   pgdata:
-  redisdata:
 
 networks:
   boilerplate-net:

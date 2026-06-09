@@ -15,13 +15,12 @@ import (
 
 	"boilerplate/internal/application"
 	"boilerplate/internal/domain"
-	"boilerplate/pkg/cache"
 )
 
 func setupTest() (*gin.Engine, *mockUserSvc) {
 	gin.SetMode(gin.TestMode)
 	mockSvc := new(mockUserSvc)
-	h := NewUserHandler(mockSvc, cache.NewNoop())
+	h := NewUserHandler(mockSvc)
 
 	r := gin.New()
 	v1 := r.Group("/api/v1")
@@ -201,7 +200,7 @@ func TestRegister_InvalidJSON(t *testing.T) {
 
 func TestUserHandler_MissingService(t *testing.T) {
 	// Ensure handler methods handle nil service gracefully
-	_ = NewUserHandler(nil, cache.NewNoop())
+	_ = NewUserHandler(nil)
 }
 
 // Protected endpoint tests — need to setup auth middleware
@@ -209,7 +208,7 @@ func TestUserHandler_MissingService(t *testing.T) {
 func setupProtectedTest() (*gin.Engine, *mockUserSvc) {
 	gin.SetMode(gin.TestMode)
 	mockSvc := new(mockUserSvc)
-	h := NewUserHandler(mockSvc, cache.NewNoop())
+	h := NewUserHandler(mockSvc)
 
 	r := gin.New()
 	users := r.Group("/api/v1/users")

@@ -42,7 +42,6 @@ Modern Go backend with **Clean Architecture** using the **Gin** framework.
 - **Auth:** JWT (HS256) via [golang-jwt](https://github.com/golang-jwt/jwt)
 - **Logging:** [zerolog](https://github.com/rs/zerolog)
 - **Config:** Environment-based via [godotenv](https://github.com/joho/godotenv)
-- **Cache:** [Redis](https://github.com/redis/go-redis) with noop/in-memory fallback
 - **Hot Reload:** [air](https://github.com/air-verse/air)
 - **Rate Limiter:** Custom sliding-window per IP
 
@@ -59,7 +58,6 @@ Modern Go backend with **Clean Architecture** using the **Gin** framework.
 │   └── router/           # Route definitions
 ├── migrations/           # SQL migrations (golang-migrate format)
 ├── pkg/
-│   ├── cache/            # Cache interface + Redis / noop / in-memory implementations
 │   ├── database/         # Database connection pool
 │   ├── migrator/         # Auto-run migrations on startup
 │   └── response/         # Standard API response helpers
@@ -169,60 +167,6 @@ When limit is exceeded, returns `429 Too Many Requests` with `Retry-After` heade
 ```bash
 # Disable rate limiter (e.g. for local dev)
 RATE_LIMIT_ENABLED=false make run
-```
-
-## Caching
-
-Optional Redis-backed caching layer with automatic noop fallback.
-
-| Env Variable | Default | Description |
-|--------------|---------|-------------|
-| `REDIS_ENABLED` | `false` | Enable Redis cache |
-| `REDIS_HOST` | `localhost` | Redis host |
-| `REDIS_PORT` | `6379` | Redis port |
-| `REDIS_PASSWORD` | | Redis password |
-| `REDIS_DB` | `0` | Redis database index |
-
-```bash
-# Enable Redis in .env
-REDIS_ENABLED=true
-```
-
-When Redis is disabled, a **noop cache** is used — handlers work normally without caching. Perfect for local dev without Redis running.
-
-### Cache Interface
-
-```go
-type Cache interface {
-    Get(ctx context.Context, key string) (string, error)
-    Set(ctx context.Context, key, value string, ttl time.Duration) error
-    Del(ctx context.Context, keys ...string) error
-    Exists(ctx context.Context, key string) (bool, error)
-    Close() error
-}
-```
-
-Any cache backend (Redis, in-memory, custom) that implements this interface can be injected.
-
-### Demo: User List Caching
-
-`GET /api/v1/users` is already wired — results are cached for **30 seconds**. Cache key format: `users:list:p{page}:pp{perPage}`.
-
-To add caching to another handler:
-
-```go
-// In your handler
-cacheKey := "my:cache:key"
-if cached, err := h.cache.Get(ctx, cacheKey); err == nil {
-    c.Data(http.StatusOK, "application/json; charset=utf-8", []byte(cached))
-    return
-}
-
-// ... fetch data ...
-
-data, _ := json.Marshal(result)
-h.cache.Set(ctx, cacheKey, string(data), 30*time.Second)
-c.JSON(http.StatusOK, result)
 ```
 
 ## API Endpoints

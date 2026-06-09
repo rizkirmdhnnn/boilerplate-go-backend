@@ -1,16 +1,12 @@
 package handler
 
 import (
-	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"strconv"
-	"time"
 
 	"boilerplate/internal/application"
 	"boilerplate/internal/domain"
-	"boilerplate/pkg/cache"
 	"boilerplate/pkg/response"
 
 	"github.com/gin-gonic/gin"
@@ -19,13 +15,12 @@ import (
 // UserHandler handles user-related HTTP requests.
 // Depends ONLY on the application.UserService interface (use-case port).
 type UserHandler struct {
-	svc   application.UserService
-	cache cache.Cache
+	svc application.UserService
 }
 
 // NewUserHandler creates a new UserHandler.
-func NewUserHandler(svc application.UserService, c cache.Cache) *UserHandler {
-	return &UserHandler{svc: svc, cache: c}
+func NewUserHandler(svc application.UserService) *UserHandler {
+	return &UserHandler{svc: svc}
 }
 
 // Register     godoc
@@ -120,7 +115,7 @@ func (h *UserHandler) GetProfile(c *gin.Context) {
 }
 
 // ListUsers    godoc
-// @Summary      List users with pagination (cached for 30s)
+// @Summary      List users with pagination
 // @Tags         users
 // @Security     BearerAuth
 // @Produce      json
@@ -139,13 +134,6 @@ func (h *UserHandler) ListUsers(c *gin.Context) {
 		perPage = 10
 	}
 
-	// Try cache first
-	cacheKey := fmt.Sprintf("users:list:p%d:pp%d", page, perPage)
-	if cached, err := h.cache.Get(c.Request.Context(), cacheKey); err == nil {
-		c.Data(http.StatusOK, "application/json; charset=utf-8", []byte(cached))
-		return
-	}
-
 	users, total, err := h.svc.List(c.Request.Context(), page, perPage)
 	if err != nil {
 		_ = c.Error(err)
@@ -153,28 +141,7 @@ func (h *UserHandler) ListUsers(c *gin.Context) {
 		return
 	}
 
-	totalPages := total / perPage
-	if total%perPage > 0 {
-		totalPages++
-	}
-
-	resp := response.APIResponse{
-		Success: true,
-		Data:    users,
-		Meta: &response.Meta{
-			Page:       page,
-			PerPage:    perPage,
-			Total:      total,
-			TotalPages: totalPages,
-		},
-	}
-
-	// Cache for 30s (best-effort, don't fail on cache error)
-	if data, err := json.Marshal(resp); err == nil {
-		_ = h.cache.Set(c.Request.Context(), cacheKey, string(data), 30*time.Second)
-	}
-
-	c.JSON(http.StatusOK, resp)
+	response.Paginated(c, users, page, perPage, total)
 }
 
 // GetUser      godoc

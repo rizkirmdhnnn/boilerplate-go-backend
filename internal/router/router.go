@@ -9,7 +9,6 @@ import (
 	"boilerplate/internal/application"
 	"boilerplate/internal/handler"
 	"boilerplate/internal/middleware"
-	"boilerplate/pkg/cache"
 	"boilerplate/pkg/database"
 
 	"github.com/gin-gonic/gin"
@@ -22,7 +21,6 @@ type Config struct {
 	CORSOrigins   []string
 	AppVersion    string
 	Debug         bool
-	Cache         cache.Cache
 	UserSvc       application.UserService
 	DBPool        *database.Pool
 
@@ -63,7 +61,7 @@ func Setup(cfg *Config) *gin.Engine {
 
 	// Handlers
 	healthHdr := handler.NewHealthHandler(cfg.DBPool)
-	userHdr := handler.NewUserHandler(cfg.UserSvc, cfg.Cache)
+	userHdr := handler.NewUserHandler(cfg.UserSvc)
 
 	// Health — no auth
 	r.GET("/health", healthHdr.Check)
