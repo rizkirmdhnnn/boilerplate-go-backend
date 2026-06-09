@@ -12,6 +12,8 @@
 // @description                Type "Bearer {token}" in the value field
 package main
 
+//go:generate swag init -g main.go --output ../docs --quiet
+
 import (
 	"context"
 	"errors"

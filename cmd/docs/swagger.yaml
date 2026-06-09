@@ -1,0 +1,18 @@
+basePath: /api/v1
+host: localhost:8080
+info:
+  contact:
+    name: Rizkirmdhn
+  description: Go backend template with Clean Architecture
+  license:
+    name: MIT
+  title: Boilerplate API
+  version: 1.0.0
+paths: {}
+securityDefinitions:
+  BearerAuth:
+    description: Type "Bearer {token}" in the value field
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

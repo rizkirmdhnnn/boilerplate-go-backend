@@ -1,4 +1,4 @@
-.PHONY: help run build test lint clean docker-up docker-down migrate
+.PHONY: help run build test lint clean swag docker-up docker-down migrate generate
 
 APP_NAME := boilerplate
 BINARY := api
@@ -22,6 +22,11 @@ test-short: ## Run short tests
 
 lint: ## Run linter
 	golangci-lint run ./...
+
+swag: ## Regenerate Swagger docs
+	swag init -g cmd/api/main.go --output docs --quiet
+
+generate: swag ## Run go generate (regenerates swagger docs)
 
 clean: ## Clean build artifacts
 	rm -rf $(BUILD_DIR) coverage.out
