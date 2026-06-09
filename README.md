@@ -76,6 +76,18 @@ make run
 make docker-up
 ```
 
+## API Documentation
+
+This project uses **swaggo/swag** to auto-generate OpenAPI docs from Go annotations.
+
+```bash
+make swag              # regenerate docs after adding annotations
+```
+
+👉 See **[SWAGGER.md](SWAGGER.md)** for full guide — annotations reference, parameter types, DTO auto-docs, and how it works.
+
+**Swagger UI:** `http://localhost:8080/swagger/index.html` (after starting the server)
+
 ## API Endpoints
 
 **Public:**
@@ -99,7 +111,11 @@ make docker-up
 ```bash
 make run          # Start server
 make build        # Build binary
-make test         # Run tests
-make docker-up    # Docker Compose up
+make test         # Run tests (+ race detector, coverage)
+make lint         # Run golangci-lint
+make swag         # Regenerate Swagger docs (after adding annotations)
+make generate     # Alias for make swag
+make coverage     # Open HTML coverage report
+make docker-up    # Docker Compose up (api + postgres)
 make docker-down  # Docker Compose down
 ```

@@ -1,4 +1,18 @@
+// @title           Boilerplate API
+// @version         1.0.0
+// @description     Go backend template with Clean Architecture
+// @contact.name    Rizkirmdhn
+// @license.name    MIT
+// @host            localhost:8080
+// @BasePath        /api/v1
+//
+// @securityDefinitions.apikey  BearerAuth
+// @in                          header
+// @name                        Authorization
+// @description                Type "Bearer {token}" in the value field
 package main
+
+//go:generate echo "use 'make swag' or run 'swag init -g cmd/api/main.go --output docs' from project root"
 
 import (
 	"context"
