@@ -1,0 +1,17 @@
+root = "."
+tmp_dir = "tmp"
+
+[build]
+  cmd = "go build -o ./tmp/api ./cmd/api"
+  entrypoint = ["./tmp/api"]
+  include_ext = ["go", "tpl", "tmpl", "html"]
+  exclude_dir = ["docs", "build", "tmp", "vendor", ".git", "node_modules"]
+  exclude_regex = [".*_test.go"]
+  exclude_unchanged = true
+  include_dir = ["cmd/api", "internal", "pkg"]
+
+[log]
+  time = true
+
+[misc]
+  clean_on_exit = true
