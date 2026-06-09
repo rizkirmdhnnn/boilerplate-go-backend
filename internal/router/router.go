@@ -41,6 +41,7 @@ func Setup(cfg *Config) *gin.Engine {
 	r.Use(middleware.Logger())
 	r.Use(middleware.CORS(cfg.CORSOrigins))
 	r.Use(middleware.SecurityHeaders())
+	r.Use(middleware.ErrorHandler())
 
 	r.Use(func(c *gin.Context) {
 		c.Set("app_version", cfg.AppVersion)
