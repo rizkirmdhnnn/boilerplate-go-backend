@@ -81,6 +81,10 @@ func main() {
 		Debug:       cfg.Debug,
 		UserSvc:     userSvc,
 		DBPool:      db,
+
+		RateLimitEnabled:        cfg.RateLimitEnabled,
+		RateLimitRequestsPerMin: cfg.RateLimitRequestsPerMin,
+		RateLimitBurst:          cfg.RateLimitBurst,
 	})
 
 	// HTTP server

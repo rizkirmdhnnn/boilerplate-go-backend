@@ -23,6 +23,11 @@ type Config struct {
 	Debug         bool
 	UserSvc       application.UserService
 	DBPool        *database.Pool
+
+	// Rate limiter settings
+	RateLimitEnabled       bool
+	RateLimitRequestsPerMin int
+	RateLimitBurst         int
 }
 
 // Setup configures the Gin router with all routes and middleware.
@@ -41,6 +46,13 @@ func Setup(cfg *Config) *gin.Engine {
 	r.Use(middleware.Logger())
 	r.Use(middleware.CORS(cfg.CORSOrigins))
 	r.Use(middleware.SecurityHeaders())
+	r.Use(middleware.ErrorHandler())
+
+	// Rate limiter (conditional)
+	if cfg.RateLimitEnabled {
+		rl := middleware.NewRateLimiterWithParams(cfg.RateLimitRequestsPerMin, cfg.RateLimitBurst)
+		r.Use(rl.RateLimit())
+	}
 
 	r.Use(func(c *gin.Context) {
 		c.Set("app_version", cfg.AppVersion)
