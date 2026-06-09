@@ -28,6 +28,7 @@ import (
 	"boilerplate/internal/repository"
 	"boilerplate/internal/router"
 	"boilerplate/pkg/database"
+	"boilerplate/pkg/migrator"
 
 	"github.com/rs/zerolog/log"
 )
@@ -59,6 +60,13 @@ func main() {
 		defer db.Close()
 	} else {
 		log.Warn().Msg("no database configured, running without DB")
+	}
+
+	// Auto-run database migrations
+	if db != nil {
+		if err := migrator.Run(context.Background(), db, "migrations"); err != nil {
+			log.Fatal().Err(err).Msg("failed to run database migrations")
+		}
 	}
 
 	// Dependency injection — wire ports to adapters
