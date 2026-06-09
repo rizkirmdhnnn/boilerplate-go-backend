@@ -1,0 +1,32 @@
+# Binary
+/api
+/tmp
+
+# IDE / Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+
+# Build artifacts
+dist/
+build/
+out/
+
+# Dependency
+vendor/
+
+# Coverage
+coverage.out
+*.cov
+
+# Testing
+testdata/
