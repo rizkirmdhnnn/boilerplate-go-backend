@@ -31,16 +31,19 @@ Modern Go backend with **Clean Architecture** using the **Gin** framework.
 | `application/` | `domain/` only | Use cases, business logic, DTOs |
 | `handler/` | `application/` | HTTP adapter — converts requests/responses |
 | `repository/` | `domain/` | Implements repository ports (PostgreSQL) |
-| `middleware/` | `application/` | HTTP concerns (auth, CORS, logging) |
+| `middleware/` | `application/` | HTTP concerns — recovery, logging, CORS, security headers, auth, error handler, rate limiter |
 | `cmd/api/` | everything | Composition root, DI wiring |
 
 ## Tech Stack
 
 - **Framework:** [Gin](https://github.com/gin-gonic/gin)
 - **Database:** PostgreSQL via [pgx v5](https://github.com/jackc/pgx/v5)
+- **Migrations:** [golang-migrate](https://github.com/golang-migrate/migrate)
 - **Auth:** JWT (HS256) via [golang-jwt](https://github.com/golang-jwt/jwt)
 - **Logging:** [zerolog](https://github.com/rs/zerolog)
 - **Config:** Environment-based via [godotenv](https://github.com/joho/godotenv)
+- **Hot Reload:** [air](https://github.com/air-verse/air)
+- **Rate Limiter:** Custom sliding-window per IP
 
 ## Project Structure
 
@@ -50,14 +53,16 @@ Modern Go backend with **Clean Architecture** using the **Gin** framework.
 │   ├── domain/           # Entities + port interfaces (pure Go)
 │   ├── application/      # Use cases, DTOs, JWT helpers
 │   ├── handler/          # HTTP handlers (adapters)
-│   ├── middleware/        # Gin middleware (auth, CORS, logging)
-|   ├── repository/       # PostgreSQL adapter (implements domain ports)
-|   └── router/           # Route definitions
+│   ├── middleware/        # Gin middleware (auth, CORS, logging, error handler, rate limiter, security headers)
+│   ├── repository/       # PostgreSQL adapter (implements domain ports)
+│   └── router/           # Route definitions
 ├── migrations/           # SQL migrations (golang-migrate format)
 ├── pkg/
-|   ├── database/         # Database connection pool
-|   ├── migrator/         # Auto-run migrations on startup
-|   └── response/         # Standard API response helpers
+│   ├── database/         # Database connection pool
+│   ├── migrator/         # Auto-run migrations on startup
+│   └── response/         # Standard API response helpers
+├── .air.toml             # Hot reload config
+├── .env.example
 ├── Dockerfile
 ├── docker-compose.yml
 └── Makefile
@@ -118,6 +123,51 @@ make migrate-down    # Rollback last migration
 ### Auto-run on Startup
 
 When the server starts (`make run`), `pkg/migrator/migrator.go` automatically runs any pending migrations using golang-migrate's Go library. Tracked in DB via `schema_migrations` table.
+
+## Hot Reload
+
+Development mode uses [air](https://github.com/air-verse/air) — automatically restarts the server when `.go` files change.
+
+```bash
+# Install (one-time)
+go install github.com/air-verse/air@latest
+
+# Start with hot reload
+make watch
+```
+
+Config in `.air.toml` — watches `cmd/api/`, `internal/`, and `pkg/`; ignores tests and `tmp/`.
+
+## Error Handler
+
+Centralized error handling via `middleware.ErrorHandler()`. Maps domain errors to appropriate HTTP status codes:
+
+| Domain Error | HTTP Status |
+|-------------|-------------|
+| `ErrNotFound` | 404 |
+| `ErrUnauthorized` | 401 |
+| `ErrForbidden` | 403 |
+| `ErrConflict` | 409 |
+| Other | 500 |
+
+Handlers just return domain errors — middleware converts them to consistent JSON responses automatically.
+
+## Rate Limiter
+
+Configurable per-IP sliding window rate limiter. Protects API from abuse.
+
+| Env Variable | Default | Description |
+|--------------|---------|-------------|
+| `RATE_LIMIT_ENABLED` | `true` | Enable/disable |
+| `RATE_LIMIT_REQUESTS_PER_MIN` | `100` | Max requests per minute per IP |
+| `RATE_LIMIT_BURST` | `20` | Max burst capacity |
+
+When limit is exceeded, returns `429 Too Many Requests` with `Retry-After` header.
+
+```bash
+# Disable rate limiter (e.g. for local dev)
+RATE_LIMIT_ENABLED=false make run
+```
 
 ## API Endpoints
 
