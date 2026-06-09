@@ -3,7 +3,7 @@ package handler
 import (
 	"net/http"
 
-	"boilerplate/pkg/database"
+	"github.com/rizkirmdhnnn/boilerplate-go-backend/pkg/database"
 
 	"github.com/gin-gonic/gin"
 )

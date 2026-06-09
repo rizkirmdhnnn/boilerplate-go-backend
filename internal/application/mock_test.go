@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/mock"
 
-	"boilerplate/internal/domain"
+	"github.com/rizkirmdhnnn/boilerplate-go-backend/internal/domain"
 )
 
 // mockUserRepo implements domain.UserRepository for testing.

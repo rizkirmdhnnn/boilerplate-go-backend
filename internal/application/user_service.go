@@ -7,7 +7,7 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
-	"boilerplate/internal/domain"
+	"github.com/rizkirmdhnnn/boilerplate-go-backend/internal/domain"
 )
 
 // userService implements the UserService use-case interface.

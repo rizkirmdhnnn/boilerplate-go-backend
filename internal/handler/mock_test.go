@@ -7,7 +7,7 @@ import (
 
 	"github.com/stretchr/testify/mock"
 
-	"boilerplate/internal/application"
+	"github.com/rizkirmdhnnn/boilerplate-go-backend/internal/application"
 )
 
 // mockUserSvc implements application.UserService for testing.

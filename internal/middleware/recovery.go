@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"boilerplate/pkg/response"
+	"github.com/rizkirmdhnnn/boilerplate-go-backend/pkg/response"
 
 	"github.com/gin-gonic/gin"
 )

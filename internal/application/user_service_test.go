@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"golang.org/x/crypto/bcrypt"
 
-	"boilerplate/internal/domain"
+	"github.com/rizkirmdhnnn/boilerplate-go-backend/internal/domain"
 )
 
 const testJWTSecret = "test-secret-key-that-is-long-enough-for-testing"

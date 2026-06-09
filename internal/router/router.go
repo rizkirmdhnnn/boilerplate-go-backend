@@ -1,16 +1,16 @@
 package router
 
 import (
-	_ "boilerplate/docs"
+	_ "github.com/rizkirmdhnnn/boilerplate-go-backend/docs"
 
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
-	"boilerplate/internal/application"
-	"boilerplate/internal/handler"
-	"boilerplate/internal/middleware"
-	"boilerplate/pkg/cache"
-	"boilerplate/pkg/database"
+	"github.com/rizkirmdhnnn/boilerplate-go-backend/internal/application"
+	"github.com/rizkirmdhnnn/boilerplate-go-backend/internal/handler"
+	"github.com/rizkirmdhnnn/boilerplate-go-backend/internal/middleware"
+	"github.com/rizkirmdhnnn/boilerplate-go-backend/pkg/cache"
+	"github.com/rizkirmdhnnn/boilerplate-go-backend/pkg/database"
 
 	"github.com/gin-gonic/gin"
 )

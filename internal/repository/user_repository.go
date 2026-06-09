@@ -7,8 +7,8 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 
-	"boilerplate/internal/domain"
-	"boilerplate/pkg/database"
+	"github.com/rizkirmdhnnn/boilerplate-go-backend/internal/domain"
+	"github.com/rizkirmdhnnn/boilerplate-go-backend/pkg/database"
 )
 
 // UserRepository implements the domain.UserRepository port using PostgreSQL + pgx.

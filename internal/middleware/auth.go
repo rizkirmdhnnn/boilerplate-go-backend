@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"strings"
 
-	"boilerplate/internal/application"
-	"boilerplate/pkg/response"
+	"github.com/rizkirmdhnnn/boilerplate-go-backend/internal/application"
+	"github.com/rizkirmdhnnn/boilerplate-go-backend/pkg/response"
 
 	"github.com/gin-gonic/gin"
 )

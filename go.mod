@@ -1,4 +1,4 @@
-module boilerplate
+module github.com/rizkirmdhnnn/boilerplate-go-backend
 
 go 1.25.0
 

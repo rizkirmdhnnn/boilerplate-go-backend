@@ -13,9 +13,9 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
-	"boilerplate/internal/application"
-	"boilerplate/internal/domain"
-	"boilerplate/pkg/cache"
+	"github.com/rizkirmdhnnn/boilerplate-go-backend/internal/application"
+	"github.com/rizkirmdhnnn/boilerplate-go-backend/internal/domain"
+	"github.com/rizkirmdhnnn/boilerplate-go-backend/pkg/cache"
 )
 
 func setupTest() (*gin.Engine, *mockUserSvc) {

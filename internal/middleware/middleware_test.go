@@ -10,7 +10,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/stretchr/testify/assert"
 
-	"boilerplate/internal/application"
+	"github.com/rizkirmdhnnn/boilerplate-go-backend/internal/application"
 )
 
 const testJWTSecret = "test-secret-key-for-middleware-testing"

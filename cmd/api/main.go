@@ -22,14 +22,14 @@ import (
 	"os/signal"
 	"syscall"
 
-	"boilerplate/internal/application"
-	"boilerplate/internal/config"
-	"boilerplate/internal/middleware"
-	"boilerplate/internal/repository"
-	"boilerplate/internal/router"
-	"boilerplate/pkg/cache"
-	"boilerplate/pkg/database"
-	"boilerplate/pkg/migrator"
+	"github.com/rizkirmdhnnn/boilerplate-go-backend/internal/application"
+	"github.com/rizkirmdhnnn/boilerplate-go-backend/internal/config"
+	"github.com/rizkirmdhnnn/boilerplate-go-backend/internal/middleware"
+	"github.com/rizkirmdhnnn/boilerplate-go-backend/internal/repository"
+	"github.com/rizkirmdhnnn/boilerplate-go-backend/internal/router"
+	"github.com/rizkirmdhnnn/boilerplate-go-backend/pkg/cache"
+	"github.com/rizkirmdhnnn/boilerplate-go-backend/pkg/database"
+	"github.com/rizkirmdhnnn/boilerplate-go-backend/pkg/migrator"
 
 	"github.com/rs/zerolog/log"
 )
