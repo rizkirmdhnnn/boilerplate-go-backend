@@ -1,4 +1,4 @@
-.PHONY: help run build test lint clean swag docker-up docker-down migrate generate
+.PHONY: help run watch build test lint clean swag docker-up docker-down migrate generate
 
 APP_NAME := boilerplate
 BINARY := api
@@ -10,6 +10,9 @@ help: ## Show this help
 
 run: ## Run the API server locally
 	go run ./cmd/api
+
+watch: ## Run with hot reload (air)
+	air
 
 build: ## Build the binary
 	go build -ldflags="-s -w" -o $(BUILD_DIR)/$(BINARY) ./cmd/api
